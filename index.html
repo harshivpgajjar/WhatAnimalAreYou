@@ -63,6 +63,34 @@
         .result h2 {
             text-align: center;
         }
+
+        .show-result-button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 18px;
+            margin-top: 20px;
+            transition: background-color 0.3s, transform 0.1s;
+            display: block;
+            width: 100%;
+        }
+        .show-result-button:hover {
+            background-color: #218838;
+            transform: scale(1.05);
+        }
+        .footer {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+        }
+
         @media (max-width: 480px) {
             .game-container {
                 padding: 10px;
@@ -435,16 +463,6 @@
             }
         }
 
-        function showEnding(ending) {
-            const gameContainer = document.getElementById('gameContainer');
-            gameContainer.innerHTML = `
-                <div class="result">
-                    <h2>Scenario Ending</h2>
-                    <p>${ending}</p>
-                    <button onclick="showResult()">See Your Animal Result</button>
-                </div>
-            `;
-        }
 
         function showResult() {
             const winningAnimal = Object.entries(animalScores).reduce((a, b) => a[1] > b[1] ? a : b)[0];
@@ -466,8 +484,22 @@
                     <h4>Peer Reviews:</h4>
                     <ul>${profile.peerReviews.map(r => `<li>${r}</li>`).join('')}</ul>
                 </div>
+                
             `;
         }
+        function showEnding(ending) {
+            const gameContainer = document.getElementById('gameContainer');
+            gameContainer.innerHTML = `
+                <div class="result">
+                    <h2>Scenario Ending</h2>
+                    <p>${ending}</p>
+                    <button class="show-result-button" onclick="showResult()">See Your Animal Result</button>
+                </div>
+                <div class="footer">Made by Harshiv and Sahasi</div>
+            `;
+        }
+
+        
 
         // Start the game
         loadQuestion(currentQuestion);
