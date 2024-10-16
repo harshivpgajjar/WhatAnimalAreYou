@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What Animal Are You?</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .game-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 600px;
+            width: 100%;
+        }
+        .question-text {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .image-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .game-image {
+            width: 48%;
+            height: 200px;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .option-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .option-button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            text-align: left;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        .result h2 {
+            text-align: center;
+        }
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 10px;
+            }
+            .options-container {
+                grid-template-columns: 1fr;
+            }
+            .image-container {
+                flex-direction: column;
+            }
+            .game-image {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container" id="gameContainer">
+        <h1 id="questionText" class="question-text"></h1>
+        <div id="imageContainer" class="image-container"></div>
+        <div id="optionsContainer" class="options-container"></div>
+    </div>
+
+    <script>
+        const animals = ['dog', 'elephant', 'rabbit', 'tiger', 'giraffe'];
+        const animalScores = {
+            dog: 0,
+            elephant: 0,
+            rabbit: 0,
+            tiger: 0,
+            giraffe: 0
+        };
+
+        const questions = {
+            start: {
+                text: "You and your animal friends go into a restaurant, what do you order?",
+                image: 'What do you order.jpg',
+                options: [
+                    { 
+                        text: 'Pizza', 
+                        animals: { dog: 2, elephant: 1, tiger: 2 },
+                        nextQuestion: 'dislike'
+                    },
+                    { 
+                        text: 'Steak', 
+                        animals: { tiger: 3, dog: 1 },
+                        nextQuestion: 'dislike'
+                    },
+                    { 
+                        text: 'Butter Chicken', 
+                        animals: { elephant: 2, rabbit: 2, giraffe: 1 },
+                        nextQuestion: 'dislike'
+                    },
+                    { 
+                        text: 'Caesars Salad', 
+                        animals: { rabbit: 3, giraffe: 3 },
+                        nextQuestion: 'dislike'
+                    },
+                ],
+            },
+            dislike: {
+                text: "You do not like what you ordered, what do you do?",
+                image: 'You do not like what you ordered, what do you do.jpg',
+                options: [
+                    { 
+                        text: "Steal your friend's food which looks very delicious", 
+                        animals: { elephant: 3, tiger: 2 },
+                        nextQuestion: 'steal'
+                    },
+                    { 
+                        text: 'Order something else', 
+                        animals: { dog: 2, giraffe: 2 },
+                        nextQuestion: 'order'
+                    },
+                    { 
+                        text: 'Ask for a refund', 
+                        animals: { rabbit: 2, giraffe: 1 },
+                        nextQuestion: 'refund'
+                    },
+                    { 
+                        text: "Spit the food on your friend's face", 
+                        animals: { tiger: 3, elephant: 1 },
+                        nextQuestion: 'spit'
+                    },
+                ],
+            },
+            steal: {
+                text: "You friend calls the Cops, what do you do when they arrive?",
+                images: ['you steal friends food.jpg', 'you steal friends food 2.jpg'],
+                options: [
+                    { 
+                        text: "Tell the cops about your friend's crimes", 
+                        animals: { elephant: 2, rabbit: 1 },
+                        nextQuestion: 'end',
+                        ending: "Both of you get arrested but are happy because you are together"
+                    },
+                    { 
+                        text: 'Turn the police van that came to arrest you into a party wagon', 
+                        animals: { dog: 3, tiger: 2 },
+                        nextQuestion: 'end',
+                        ending: "Everybody parties but you end up in jail"
+                    },
+                    { 
+                        text: 'Buy the officers a donut to let you go', 
+                        animals: { giraffe: 2, rabbit: 2 },
+                        nextQuestion: 'end',
+                        ending: "Officer is happy, and lets you go"
+                    },
+                ],
+            },
+            order: {
+                text: "The waiter brings you the menu, what do you order?",
+                images: ['order something else.jpg','order something else 2.jpg'],
+                options: [
+                    { 
+                        text: 'Order something you see on the menu', 
+                        animals: { rabbit: 2, giraffe: 2 },
+                        nextQuestion: 'end',
+                        ending: "You now like the food, it's very tasty and you enjoy"
+                    },
+                    { 
+                        text: "Order the chef's special", 
+                        animals: { tiger: 2, elephant: 2 },
+                        nextQuestion: 'end',
+                        ending: "The chef has very bad taste, and now you leave with a very angry mood"
+                    },
+                    { 
+                        text: "Give him your grandma's recipe and tell him to make it", 
+                        animals: { dog: 3, giraffe: 1 },
+                        nextQuestion: 'end',
+                        ending: "Your recipe impresses everybody and you are hired as the new chef"
+                    },
+                ],
+            },
+            refund: {
+                text: "Turns out, the waiter is a gangster, and you are now in a hostage situation because you have pissed him off. What do you do?",
+                images: ['you ask for A refund.jpg', 'you ask for A refund 2.jpg'],
+                options: [
+                    { 
+                        text: 'Flirt with him', 
+                        animals: { elephant: 3, tiger: 2 },
+                        nextQuestion: 'end',
+                        ending: "He offers you a place in the gang, which you accept"
+                    },
+                    { 
+                        text: 'Try to talk to them about extended warranty', 
+                        animals: { rabbit: 2, giraffe: 1 },
+                        nextQuestion: 'end',
+                        ending: "They do not want an extended warranty, they are going to rob you"
+                    },
+                    { 
+                        text: 'Offer to make him some food', 
+                        animals: { dog: 3, giraffe: 2 },
+                        nextQuestion: 'end',
+                        ending: "He becomes nostalgic, and lets you go"
+                    },
+                ],
+            },
+            spit: {
+                text: "Turns out, your friend is into it, What do you do now?",
+                images: ['spitting on friends face.jpg', 'spitting on friends face 2.jpg'],
+                options: [
+                    { 
+                        text: 'Get cuffs to go with it', 
+                        animals: { tiger: 3, elephant: 2 },
+                        nextQuestion: 'end',
+                        ending: "You have found your soulmate, and are married now"
+                    },
+                    { 
+                        text: 'Ask him out', 
+                        animals: { dog: 2, rabbit: 1 },
+                        nextQuestion: 'end',
+                        ending: "They get angry, and leave"
+                    },
+                    { 
+                        text: 'Ask him to spit back at you', 
+                        animals: { elephant: 3, tiger: 1 },
+                        nextQuestion: 'end',
+                        ending: "They are weirded out"
+                    },
+                    { 
+                        text: 'Apologize', 
+                        animals: { rabbit: 3, giraffe: 2 },
+                        nextQuestion: 'end',
+                        ending: "They forgive you"
+                    },
+                ],
+            },
+        };
+
+        const animalProfiles = {
+            dog: {
+                strengths: [
+                    "Loyalty that puts soccer fans to shame",
+                    "Ability to turn any human into a professional thrower",
+                    "Master of the 'puppy eyes' technique for treat acquisition"
+                ],
+                weaknesses: [
+                    "Extreme gullibility to the phrase 'Who's a good boy?'",
+                    "Inability to resist chasing own tail",
+                    "Chronic mailman-phobia"
+                ],
+                quotes: [
+                    "I don't always bark at nothing, but when I do, it's at 3 AM.",
+                    "I'm not drooling, I'm just watering the floor.",
+                    "Homework? Sorry, I ate it. No really, I did.",
+                    "Fetch is just a game of 'throw and bring back' with extra steps."
+                ],
+                hiddenTalent: "Can predict the exact moment food will fall from the table",
+                peerReviews: [
+                    "Great at parties, terrible at hide and seek.",
+                    "Always down for a walk, even if it's just to the fridge.",
+                    "Excellent listener, but has a habit of interrupting with random barks.",
+                    "Will work for food, but union mandates belly rubs as overtime pay."
+                ]
+            },
+            elephant: {
+                strengths: [
+                    "Never forgets a face, or where the peanuts are hidden",
+                    "Built-in shower system for spontaneous water fights",
+                    "Can give both piggyback and trunk rides simultaneously"
+                ],
+                weaknesses: [
+                    "Chronic fear of mice (it's not a stereotype, it's a lifestyle)",
+                    "Tendency to accidentally sit on small vehicles",
+                    "Struggles with delicate tasks due to trunk-based clumsiness"
+                ],
+                quotes: [
+                    "I'm not fat, I'm just big-boned... and big-everything-else.",
+                    "Why did the elephant cross the road? To prove to the possum it could be done!",
+                    "I've got thick skin, but please, no more wrinkle cream ads.",
+                    "Yes, I'm the elephant in the room. No, I won't address myself."
+                ],
+                hiddenTalent: "Can play 'Flight of the Bumblebee' using only their trunk",
+                peerReviews: [
+                    "Great memory, but sometimes forgets they're not a mouse.",
+                    "Excellent at moving furniture, not so great at feng shui.",
+                    "Always the life of the party, especially in china shops.",
+                    "Trunk is versatile, but please stop using it as a selfie stick."
+                ]
+            },
+            rabbit: {
+                strengths: [
+                    "Unmatched speed in carrot-eating contests",
+                    "Expert in the art of multiplying... numerically and literally",
+                    "Can turn any field into a professional hop-scotch court"
+                ],
+                weaknesses: [
+                    "Chronic lateness despite incredible speed",
+                    "Unhealthy obsession with pocket watches",
+                    "Tendency to lead others down rabbit holes... literally"
+                ],
+                quotes: [
+                    "I'm not late, I'm just early for tomorrow.",
+                    "Carrots are the original orange juice.",
+                    "Why take the elevator when you can hop?",
+                    "I don't multiply like rabbits, rabbits multiply like me!"
+                ],
+                hiddenTalent: "Can recite 'Alice in Wonderland' backwards while hopping",
+                peerReviews: [
+                    "Great at quick decisions, not so great at long-term planning.",
+                    "Always first to arrive at parties... from the future.",
+                    "Excellent at hide and seek, but always hides in a hutch.",
+                    "Can outrun anyone, but always stops for snacks."
+                ]
+            },
+            tiger: {
+                strengths: [
+                    "Mastery of the 'silent but deadly' approach",
+                    "Can turn any cardboard box into a 5-star hotel",
+                    "Expert in impromptu camouflage and jungle fashion"
+                ],
+                weaknesses: [
+                    "Irresistible urge to knock things off high places",
+                    "Chronic catnip addiction",
+                    "Inability to resist laser pointers, regardless of size"
+                ],
+                quotes: [
+                    "I'm not a morning person, I'm a 3 AM zoomies person.",
+                    "My stripes are actually racing stripes. Bet you feel slow now.",
+                    "I don't always roar, but when I do, the neighbors call animal control.",
+                    "Yes, I can change my stripes. Watch me roll in paint."
+                ],
+                hiddenTalent: "Can do a purrfect impression of a housecat... until dinnertime",
+                peerReviews: [
+                    "Great hunter, but please stop bringing half-eaten gazelles to potlucks.",
+                    "Excellent at stealth, not so great at karaoke nights.",
+                    "Always the cool cat at parties, but tends to hog the scratching post.",
+                    "Loves water, as long as it's not bath time."
+                ]
+            },
+            giraffe: {
+                strengths: [
+                    "Unparalleled ability to reach the top shelf",
+                    "Natural talent for spotting danger... way before anyone else",
+                    "Expert in the art of looking down on others... literally"
+                ],
+                weaknesses: [
+                    "Chronic neck pain from constant cloud watching",
+                    "Inability to use revolving doors",
+                    "Tendency to get tangled in Christmas lights"
+                ],
+                quotes: [
+                    "I'm not tall, I'm just standing on my tippy toes... always.",
+                    "Why yes, the weather is different up here.",
+                    "I'd love to see eye to eye with you, but I'm a bit short on time.",
+                    "No, I can't slam dunk. Basketball hoops are too low for me."
+                ],
+                hiddenTalent: "Can tie shoelaces using only their tongue",
+                peerReviews: [
+                    "Great at changing light bulbs, not so great at limbo.",
+                    "Always has the best view at concerts, but blocks everyone else's.",
+                    "Excellent at pruning tall trees, terrible at hide and seek.",
+                    "Can spot danger from afar, but often trips over own feet."
+                ]
+            }
+        };
+
+        let currentQuestion = 'start';
+
+        function loadQuestion(questionId) {
+            if (questionId === 'end') {
+                showResult();
+                return;
+            }
+
+            const question = questions[questionId];
+            document.getElementById('questionText').textContent = question.text;
+            
+            const imageContainer = document.getElementById('imageContainer');
+            imageContainer.innerHTML = '';
+            if (Array.isArray(question.images)) {
+                question.images.forEach(imageSrc => {
+                    const img = document.createElement('img');
+                    img.src = imageSrc;
+                    img.alt = "Question Image";
+                    img.className = "game-image";
+                    imageContainer.appendChild(img);
+                });
+            } else {
+                const img = document.createElement('img');
+                img.src = question.image;
+                img.alt = "Question Image";
+                img.className = "game-image";
+                img.style.width = "100%";
+                imageContainer.appendChild(img);
+            }
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'option-button';
+                button.textContent = option.text;
+                button.onclick = () => selectOption(option);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function selectOption(option) {
+            for (const [animal, points] of Object.entries(option.animals)) {
+                animalScores[animal] += points;
+            }
+            if (option.ending) {
+                showEnding(option.ending);
+            } else {
+                loadQuestion(option.nextQuestion);
+            }
+        }
+
+        function showEnding(ending) {
+            const gameContainer = document.getElementById('gameContainer');
+            gameContainer.innerHTML = `
+                <div class="result">
+                    <h2>Scenario Ending</h2>
+                    <p>${ending}</p>
+                    <button onclick="showResult()">See Your Animal Result</button>
+                </div>
+            `;
+        }
+
+        function showResult() {
+            const winningAnimal = Object.entries(animalScores).reduce((a, b) => a[1] > b[1] ? a : b)[0];
+            const profile = animalProfiles[winningAnimal];
+            const gameContainer = document.getElementById('gameContainer');
+            gameContainer.innerHTML = `
+                <div class="result">
+                    <h2>You Are A ${winningAnimal.charAt(0).toUpperCase() + winningAnimal.slice(1)}!</h2>
+                    <img src="${winningAnimal.concat('.jpg')}" alt="${winningAnimal}" class="game-image" style="width:100%;">
+                    <h3>Profile:</h3>
+                    <h4>Strengths:</h4>
+                    <ul>${profile.strengths.map(s => `<li>${s}</li>`).join('')}</ul>
+                    <h4>Weaknesses:</h4>
+                    <ul>${profile.weaknesses.map(w => `<li>${w}</li>`).join('')}</ul>
+                    <h4>Quotes:</h4>
+                    <ul>${profile.quotes.map(q => `<li>"${q}"</li>`).join('')}</ul>
+                    <h4>Hidden Talent:</h4>
+                    <p>${profile.hiddenTalent}</p>
+                    <h4>Peer Reviews:</h4>
+                    <ul>${profile.peerReviews.map(r => `<li>${r}</li>`).join('')}</ul>
+                </div>
+            `;
+        }
+
+        // Start the game
+        loadQuestion(currentQuestion);
+    </script>
+</body>
+</html>
